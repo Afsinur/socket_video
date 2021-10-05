@@ -41,4 +41,8 @@ io.on("connection", (socket) => {
   socket.on("blob", (data) => {
     io.sockets.emit("blob", data);
   });
+
+  socket.on("blobStop", () => {
+    io.sockets.emit("blobStop");
+  });
 });

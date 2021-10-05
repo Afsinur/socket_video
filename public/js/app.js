@@ -45,19 +45,9 @@ stop_button.addEventListener("click", function () {
   media_recorder.stop();
   start_button.removeAttribute("disabled");
   stop_button.setAttribute("disabled", "disabled");
-  //clearInterval(inter__);
 
-  let video_local = URL.createObjectURL(
-    new Blob(totalArrBuff, { type: "video/webm" })
-  );
-
-  let a_ = document.createElement("a");
-  a_.href = `${video_local}`;
-  a_.style.display = `none`;
-  a_.download = "video record";
-  a_.click();
-  document.body.appendChild(a_);
-  a_.remove();
+  //
+  socket.emit("blobStop");
 });
 
 stop_camera.addEventListener("click", () => {
@@ -77,6 +67,20 @@ stop_camera.addEventListener("click", () => {
 
 socket.on("blob", (data) => {
   totalArrBuff.push(data);
+});
+
+socket.on("blobStop", () => {
+  let video_local = URL.createObjectURL(
+    new Blob(totalArrBuff, { type: "video/webm" })
+  );
+
+  let a_ = document.createElement("a");
+  a_.href = `${video_local}`;
+  a_.style.display = `none`;
+  a_.download = "video record";
+  a_.click();
+  document.body.appendChild(a_);
+  a_.remove();
 });
 
 //http://localhost:1000/streamvideo
