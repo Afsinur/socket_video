@@ -1,7 +1,6 @@
 {
   "name": "sendlivevideo",
   "version": "1.0.0",
-  "description": "",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
@@ -11,5 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "socket.io": "^4.2.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "socket_video"
+  },
+  "description": ""
 }
