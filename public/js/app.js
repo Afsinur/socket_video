@@ -34,7 +34,7 @@ start_button.addEventListener("click", function () {
   });
 
   // start recording with each recorded blob having 1 second video
-  let recordAfterSecond = 2000;
+  let recordAfterSecond = 500;
   media_recorder.start(recordAfterSecond);
 
   start_button.setAttribute("disabled", "disabled");
@@ -42,12 +42,12 @@ start_button.addEventListener("click", function () {
 });
 
 stop_button.addEventListener("click", function () {
+  socket.emit("blobStop");
   media_recorder.stop();
   start_button.removeAttribute("disabled");
   stop_button.setAttribute("disabled", "disabled");
 
   //
-  socket.emit("blobStop");
 });
 
 stop_camera.addEventListener("click", () => {
