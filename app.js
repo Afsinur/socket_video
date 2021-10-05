@@ -1,7 +1,7 @@
 const { createReadStream } = require("fs");
 const http = require("http");
 const server = http.createServer();
-const port_ = process.env.port || "1000";
+const port_ = process.env.PORT || "1000";
 const static_ = `${__dirname}/public`;
 
 const socket = require("socket.io");
