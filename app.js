@@ -6,14 +6,6 @@ const static_ = `${__dirname}/public`;
 
 const socket = require("socket.io");
 
-const os = require("os");
-console.log(
-  "IP Address: " +
-    JSON.stringify(os.networkInterfaces()["Wi-Fi"]).match(
-      /"192.168.\d+.\d+"/g
-    )[0]
-);
-
 //function
 
 //server
@@ -46,8 +38,6 @@ server.listen(port_, () => {
 const io = socket(server);
 
 io.on("connection", (socket) => {
-  console.log(socket.id);
-
   socket.on("blob", (data) => {
     io.sockets.emit("blob", data);
   });
