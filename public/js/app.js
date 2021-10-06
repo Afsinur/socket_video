@@ -13,7 +13,7 @@ let dataType_ = null;
 let typeOnline;
 let totalArrBuff = [];
 let prevFile = [];
-let dOWnLOADsPEED = 15000;
+let dOWnLOADsPEED = 100000;
 
 camera_button.addEventListener("click", async function () {
   stop_camera.removeAttribute("disabled");
