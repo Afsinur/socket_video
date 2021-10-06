@@ -1,6 +1,8 @@
 const socket = io("/");
 let camera_button = document.querySelector("#start-camera");
 let stop_camera = document.querySelector("#stop-camera");
+let face_camera = document.querySelector("#face-camera");
+let environment_camera = document.querySelector("#environment-camera");
 let video = document.querySelector("#video");
 let start_button = document.querySelector("#start-record");
 let stop_button = document.querySelector("#stop-record");
@@ -8,17 +10,28 @@ let download_link = document.querySelector("#download-video");
 
 let camera_stream = null;
 let media_recorder = null;
+let dataType_ = null;
+let typeOnline;
 let totalArrBuff = [];
+let prevFile = [];
+let dOWnLOADsPEED = 15000;
 
 camera_button.addEventListener("click", async function () {
-  start_button.removeAttribute("disabled");
   stop_camera.removeAttribute("disabled");
+  environment_camera.removeAttribute("disabled");
+
   camera_stream = await navigator.mediaDevices.getUserMedia({
-    video: true,
+    video: {
+      facingMode: "user",
+      /*facingMode: {
+        exact: "environment",
+      },*/
+    },
     audio: true,
   });
 
   video.srcObject = camera_stream;
+  start_button.removeAttribute("disabled");
 });
 
 start_button.addEventListener("click", function () {
@@ -30,7 +43,14 @@ start_button.addEventListener("click", function () {
 
   // event : new recorded video blob available
   media_recorder.addEventListener("dataavailable", function (e) {
-    socket.emit("blob", e.data);
+    //socket.emit("blob", e.data);
+    totalArrBuff.push(e.data);
+
+    if (e.data.type === "video/x-matroska;codecs=avc1,opus") {
+      dataType_ = "video/mp4";
+    } else {
+      dataType_ = e.data.type;
+    }
   });
 
   // start recording with each recorded blob having 1 second video
@@ -43,44 +63,118 @@ start_button.addEventListener("click", function () {
 
 stop_button.addEventListener("click", function () {
   socket.emit("blobStop");
+
   media_recorder.stop();
+
   start_button.removeAttribute("disabled");
   stop_button.setAttribute("disabled", "disabled");
-
-  //
 });
 
 stop_camera.addEventListener("click", () => {
   start_button.setAttribute("disabled", "disabled");
   stop_camera.setAttribute("disabled", "disabled");
   stop_button.setAttribute("disabled", "disabled");
+  face_camera.setAttribute("disabled", "disabled");
+  environment_camera.setAttribute("disabled", "disabled");
 
-  var stream = video.srcObject;
-  var tracks = stream.getTracks();
+  let stream = video.srcObject;
+  let tracks = stream.getTracks();
 
-  for (var i = 0; i < tracks.length; i++) {
-    var track = tracks[i];
+  for (let i = 0; i < tracks.length; i++) {
+    let track = tracks[i];
     track.stop();
   }
   video.srcObject = null;
 });
 
-socket.on("blob", (data) => {
-  totalArrBuff.push(data);
+face_camera.addEventListener("click", async () => {
+  try {
+    camera_stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "user",
+      },
+      audio: true,
+    });
+
+    face_camera.setAttribute("disabled", "disabled");
+    environment_camera.removeAttribute("disabled");
+  } catch (error) {
+    console.log(error.name);
+  }
+});
+
+environment_camera.addEventListener("click", async () => {
+  try {
+    camera_stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: {
+          exact: "environment",
+        },
+      },
+      audio: true,
+    });
+
+    environment_camera.setAttribute("disabled", "disabled");
+    face_camera.removeAttribute("disabled");
+  } catch (error) {
+    console.log(error.name);
+  }
 });
 
 socket.on("blobStop", () => {
-  let video_local = URL.createObjectURL(
-    new Blob(totalArrBuff, { type: "video/webm" })
-  );
+  (async () => {
+    let buffer = await new Blob(totalArrBuff, {
+      type: dataType_,
+    }).arrayBuffer();
 
-  let a_ = document.createElement("a");
-  a_.href = `${video_local}`;
-  a_.style.display = `none`;
-  a_.download = "video record";
-  a_.click();
-  document.body.appendChild(a_);
-  a_.remove();
+    /*let video_local = URL.createObjectURL(buffer);
+    console.log(video_local);*/
+
+    //
+    let reslt_ = buffer;
+    let reslt_LN = reslt_.byteLength;
+    let slicePer = dOWnLOADsPEED;
+    let slicePerCount = reslt_LN / slicePer;
+    let sentAlready = 0;
+
+    //document.querySelector(
+    //  `div.${classNM} span`
+    //).style.transform = `translateX(-${100 - sentAlready}%)`;
+
+    for (let index = 0; index < slicePerCount + 1; index++) {
+      let strt_ = index * slicePer;
+      let end_ = strt_ + slicePer;
+      let slicedData = reslt_.slice(strt_, end_);
+
+      sentAlready = (index * 100) / Math.floor(slicePerCount + 1);
+
+      if (strt_ < reslt_LN) {
+        socket.emit("blob", { slicedData, dataType_, sentAlready });
+      } else {
+        socket.emit("blob", { sentAlready });
+      }
+    }
+  })();
 });
 
+socket.on("blob", ({ slicedData, dataType_, sentAlready }) => {
+  if (slicedData !== undefined || dataType_ !== undefined) {
+    prevFile.push(slicedData);
+    typeOnline = dataType_;
+  }
+
+  if (sentAlready === 100) {
+    let blb = new Blob(prevFile, {
+      type: typeOnline,
+    });
+
+    let a_ = document.createElement("a");
+    a_.href = `${URL.createObjectURL(blb)}`;
+    a_.style.display = `none`;
+    a_.download = "online data";
+    a_.click();
+    document.body.appendChild(a_);
+    a_.remove();
+  }
+});
 //http://localhost:1000/streamvideo
