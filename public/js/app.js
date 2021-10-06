@@ -5,7 +5,6 @@ let video = document.querySelector("#video");
 let start_button = document.querySelector("#start-record");
 let stop_button = document.querySelector("#stop-record");
 let download_link = document.querySelector("#download-video");
-let sentData = document.querySelector("#sentData");
 
 let camera_stream = null;
 let media_recorder = null;
@@ -80,7 +79,7 @@ stop_camera.addEventListener("click", () => {
 
 socket.on("blobStop", () => {
   (async () => {
-    sentData.innerHTML = ``;
+    document.querySelector("#sentData").innerHTML = ``;
 
     let buffer = await new Blob(totalArrBuff, {
       type: dataType_,
@@ -122,10 +121,14 @@ socket.on("blob", ({ slicedData, dataType_, sentAlready }) => {
     typeOnline = dataType_;
   }
 
-  sentData.innerHTML = `Recived Data: ${sentAlready.toFixed(2)}%`;
+  document.querySelector(
+    "#sentData"
+  ).innerHTML = `Recived Data: ${sentAlready.toFixed(2)}%`;
 
   if (sentAlready === 100) {
-    sentData.innerHTML = `Recived Data: ${sentAlready}%`;
+    document.querySelector(
+      "#sentData"
+    ).innerHTML = `Recived Data: ${sentAlready}%`;
 
     let blb = new Blob(prevFile, {
       type: typeOnline,
