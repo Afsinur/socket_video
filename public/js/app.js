@@ -1,8 +1,6 @@
 const socket = io("/");
 let camera_button = document.querySelector("#start-camera");
 let stop_camera = document.querySelector("#stop-camera");
-let face_camera = document.querySelector("#face-camera");
-let environment_camera = document.querySelector("#environment-camera");
 let video = document.querySelector("#video");
 let start_button = document.querySelector("#start-record");
 let stop_button = document.querySelector("#stop-record");
@@ -18,15 +16,9 @@ let dOWnLOADsPEED = 15000;
 
 camera_button.addEventListener("click", async function () {
   stop_camera.removeAttribute("disabled");
-  environment_camera.removeAttribute("disabled");
 
   camera_stream = await navigator.mediaDevices.getUserMedia({
-    video: {
-      facingMode: "user",
-      /*facingMode: {
-        exact: "environment",
-      },*/
-    },
+    video: true,
     audio: true,
   });
 
@@ -74,8 +66,6 @@ stop_camera.addEventListener("click", () => {
   start_button.setAttribute("disabled", "disabled");
   stop_camera.setAttribute("disabled", "disabled");
   stop_button.setAttribute("disabled", "disabled");
-  face_camera.setAttribute("disabled", "disabled");
-  environment_camera.setAttribute("disabled", "disabled");
 
   let stream = video.srcObject;
   let tracks = stream.getTracks();
@@ -85,44 +75,6 @@ stop_camera.addEventListener("click", () => {
     track.stop();
   }
   video.srcObject = null;
-});
-
-face_camera.addEventListener("click", async () => {
-  try {
-    camera_stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: "user",
-      },
-      audio: true,
-    });
-
-    video.srcObject = camera_stream;
-
-    face_camera.setAttribute("disabled", "disabled");
-    environment_camera.removeAttribute("disabled");
-  } catch (error) {
-    console.log(error.name);
-  }
-});
-
-environment_camera.addEventListener("click", async () => {
-  try {
-    camera_stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: {
-          exact: "environment",
-        },
-      },
-      audio: true,
-    });
-
-    video.srcObject = camera_stream;
-
-    environment_camera.setAttribute("disabled", "disabled");
-    face_camera.removeAttribute("disabled");
-  } catch (error) {
-    console.log(error.name);
-  }
 });
 
 socket.on("blobStop", () => {
