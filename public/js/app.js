@@ -96,6 +96,8 @@ face_camera.addEventListener("click", async () => {
       audio: true,
     });
 
+    video.srcObject = camera_stream;
+
     face_camera.setAttribute("disabled", "disabled");
     environment_camera.removeAttribute("disabled");
   } catch (error) {
@@ -113,6 +115,8 @@ environment_camera.addEventListener("click", async () => {
       },
       audio: true,
     });
+
+    video.srcObject = camera_stream;
 
     environment_camera.setAttribute("disabled", "disabled");
     face_camera.removeAttribute("disabled");
