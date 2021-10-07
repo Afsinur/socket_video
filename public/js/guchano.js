@@ -7,16 +7,15 @@ let cngNM;
 let typeOnline;
 
 let fileREALname;
-let REALFILE_ = [];
 let prevFile = [];
 let gb = 0;
-let dOWnLOADsPEED = 1000000 / 1; //50000 bytes = 50 kb
+let dOWnLOADsPEED = 1000000 / 4; //50000 bytes = 50 kb
 
 sendFile.addEventListener("change", (e) => {
   const file_AR = e.target.files;
 
   Array.from(file_AR).forEach((file_, i) => {
-    document.querySelector("#sentData").innerHTML = `Preparing..`;
+    document.querySelector("#sentData").innerHTML = `Prepareing..`;
 
     const regex = /\p{Extended_Pictographic}/u;
     let cngName_ = file_.name;
@@ -40,66 +39,73 @@ sendFile.addEventListener("change", (e) => {
         let slicePer = dOWnLOADsPEED;
         let slicePerCount = reslt_LN / slicePer;
         let sentAlready = 0;
-        let out_ = 0;
-        REALFILE_ = [];
+        let index = 0;
 
-        for (let index = 0; index < slicePerCount + 1; index++) {
+        if (index < slicePerCount + 1) {
           let strt_ = index * slicePer;
           let end_ = strt_ + slicePer;
           let slicedData = reslt_.slice(strt_, end_);
 
-          if (strt_ < reslt_LN) {
-            REALFILE_.push(slicedData);
-          } else {
-            if (out_ < 1) {
-              out_++;
-              console.log(REALFILE_.length);
+          sentAlready = (index * 100) / Math.floor(slicePerCount + 1);
 
-              sentAlready = (0 * 100) / REALFILE_.length;
+          document.querySelector(
+            "#sentData"
+          ).innerHTML = `Sent Data: ${sentAlready.toFixed(2)}%`;
 
-              document.querySelector(
-                "#sentData"
-              ).innerHTML = `Sent Data: ${sentAlready.toFixed(2)}%`;
-
-              socket.emit("blob", {
-                slicedData: REALFILE_[0],
-                sentAlready,
-                index: 0,
-              });
-            }
-          }
+          socket.emit("blob", {
+            slicedData,
+            sentAlready,
+            index,
+          });
         }
 
         if (gb < 1) {
           gb++;
 
           socket.on("fileRECV", (index) => {
-            sentAlready = (index * 100) / REALFILE_.length;
+            if (index < slicePerCount + 1) {
+              let strt_ = index * slicePer;
+              let end_ = strt_ + slicePer;
+              let slicedData = reslt_.slice(strt_, end_);
 
-            if (sentAlready === 100) {
-              socket.emit("blob", {
-                sentAlready,
-                index,
-                fileNM_: fileREALname,
-                dataType_,
-              });
+              sentAlready = (index * 100) / Math.floor(slicePerCount + 1);
 
-              e.target.value = "";
-              REALFILE_ = [];
+              if (strt_ < reslt_LN) {
+                document.querySelector(
+                  "#sentData"
+                ).innerHTML = `Sent Data: ${sentAlready.toFixed(2)}%`;
 
-              document.querySelector(
-                "#sentData"
-              ).innerHTML = `Sent Data: ${sentAlready}%`;
-            } else if (sentAlready < 100) {
-              document.querySelector(
-                "#sentData"
-              ).innerHTML = `Sent Data: ${sentAlready.toFixed(2)}%`;
+                console.log(slicedData);
 
-              socket.emit("blob", {
-                slicedData: REALFILE_[index],
-                sentAlready,
-                index,
-              });
+                socket.emit("blob", {
+                  slicedData,
+                  sentAlready,
+                  index,
+                });
+              } else {
+                console.log(slicedData);
+
+                if (sentAlready === 100) {
+                  socket.emit("blob", {
+                    sentAlready,
+                    index,
+                    fileNM_: fileREALname,
+                    dataType_,
+                  });
+
+                  e.target.value = "";
+
+                  document.querySelector(
+                    "#sentData"
+                  ).innerHTML = `Sent Data: ${sentAlready}%`;
+                } else if (sentAlready < 100) {
+                  socket.emit("blob", { sentAlready, index });
+
+                  document.querySelector(
+                    "#sentData"
+                  ).innerHTML = `Sent Data: ${sentAlready.toFixed(2)}%`;
+                }
+              }
             }
           });
         }
