@@ -5,21 +5,36 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>file system | home</title>
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="../css/style.css" />
     <script src="/socket.io/socket.io.js"></script>
-    <script src="js/app.js" defer></script>
+    <script src="../js/app.js" defer></script>
   </head>
   <body>
-    <button id="start-camera">Start Camera</button>
+    <div id="app" style="display: none">
+      <div style="display: none">
+        <button id="start-camera">Start Camera</button>
 
-    <button id="stop-camera" disabled>Stop Camera</button>
+        <button id="stop-camera" disabled>Stop Camera</button>
 
-    <video id="video" width="320" height="240" autoplay></video>
+        <br /><video id="video" width="320" height="240" autoplay></video><br />
 
-    <button id="start-record" disabled>Start Recording</button>
+        <button id="start-record" disabled>Start Recording</button>
 
-    <button id="stop-record" disabled>Stop Recording</button>
+        <button id="stop-record" disabled>Stop Recording</button>
+      </div>
 
-    <p id="sentData"></p>
+      <input id="sendFile" type="file" />
+
+      <p id="sentData"></p>
+      <p id="recvData"></p>
+    </div>
+
+    <p id="joinP">
+      <input type="text" id="join-room-input" placeholder="Room ID.." /><button
+        id="join-room-button"
+      >
+        Join
+      </button>
+    </p>
   </body>
 </html>
